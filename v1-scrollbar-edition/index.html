@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Vault | Scroll Bar Version</title>
+    <link href="https://fonts.bunny.net/css?family=cinzel:400,700,900|lato:300,400,700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        
+        :root {
+            --moth-gold: #d4af37;
+            --moth-orange: #c46d1b;
+            --deep-red: #8a0b0b;
+            --bright-red: #ff334b;
+            --text-red: #ff4d5e;
+            --gothic-red: #d62828;
+            --purple-glow: #c084fc;
+            --off-white: #e8e8e8;
+            --void-black: #050505;
+            --panel-bg: rgba(10, 8, 10, 0.85);
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: var(--void-black);
+            color: var(--off-white);
+            font-family: 'Lato', sans-serif;
+            margin: 0; 
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle at 50% 0%, rgba(138, 11, 11, 0.2) 0%, transparent 70%);
+        }
+
+        /* Enhanced Scrollbar Styling */
+        ::-webkit-scrollbar { 
+            width: 8px; 
+            height: 8px;
+            transition: all 0.3s ease;
+        }
+        ::-webkit-scrollbar-track { 
+            background: var(--void-black); 
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--deep-red); 
+            border-radius: 6px;
+            border: 1px solid rgba(0,0,0,0.5);
+        }
+        
+        /* Thicken scrollbar on hover for easy picking */
+        main:hover::-webkit-scrollbar,
+        aside:hover::-webkit-scrollbar,
+        .modal-content:hover::-webkit-scrollbar,
+        ::-webkit-scrollbar:hover { 
+            width: 14px; 
+            height: 14px;
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+            background: var(--bright-red); 
+            box-shadow: 0 0 12px var(--bright-red);
+        }
+        * { scrollbar-width: thin; scrollbar-color: var(--deep-red) var(--void-black); }
+
+        h1, h2, h3, .cinzel { font-family: 'Cinzel', serif; }
+
+        header {
+            padding: 1.2rem 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(12px);
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            margin: 0;
+            text-shadow: 0 0 18px rgba(255, 51, 75, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .title-badge {
+            font-size: 0.75rem;
+            color: var(--bright-red);
+            letter-spacing: 0.1em;
+            border: 1px solid var(--deep-red);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            background: rgba(138, 11, 11, 0.15);
+        }
+
+        .vault-summary-badge {
+            font-size: 0.75rem;
+            color: var(--moth-gold);
+            letter-spacing: 0.12em;
+            margin-left: 0.5rem;
+        }
+
+        .mount-btn {
+            background: rgba(138, 11, 11, 0.2);
+            border: 1px solid var(--deep-red);
+            color: var(--off-white);
+            padding: 0.65rem 1.6rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(4px);
+            border-radius: 4px;
+        }
+
+        .mount-btn:hover {
+            background: rgba(214, 40, 40, 0.4);
+            box-shadow: 0 0 20px rgba(255, 51, 75, 0.5);
+            color: var(--moth-gold);
+            border-color: var(--moth-gold);
+            transform: translateY(-1px);
+        }
+
+        .layout-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        aside {
+            width: 280px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--glass-border);
+            padding: 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex-shrink: 0;
+            transition: width 0.15s ease;
+        }
+
+        /* Resizer Drag Line */
+        #resizer {
+            width: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: ew-resize;
+            z-index: 20;
+            position: relative;
+            transition: background 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+        #resizer::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+        #resizer:hover, #resizer.resizing {
+            background: var(--deep-red);
+            box-shadow: 0 0 15px var(--bright-red);
+        }
+        #resizer:hover::after, #resizer.resizing::after {
+            background: var(--moth-gold);
+        }
+
+        .category-btn {
+            background: transparent;
+            border: none;
+            border-left: 3px solid transparent;
+            color: rgba(255, 255, 255, 0.55);
+            padding: 1rem 1.8rem;
+            text-align: left;
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            white-space: nowrap;
+        }
+
+        .category-btn:hover {
+            color: var(--off-white);
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+        }
+
+        .category-btn.active {
+            color: var(--moth-gold);
+            border-left-color: var(--bright-red);
+            background: linear-gradient(90deg, rgba(138, 11, 11, 0.25) 0%, transparent 100%);
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+        }
+
+        .cat-count {
+            font-family: 'Lato', sans-serif;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.03em;
+        }
+
+        .category-btn.active .cat-count { 
+            color: var(--text-red); 
+            font-weight: 700;
+        }
+
+        main {
+            flex: 1;
+            padding: 1.5rem 2.5rem;
+            overflow-y: auto;
+            position: relative;
+            background: rgba(5, 5, 5, 0.4);
+        }
+
+        /* Toolbar & Search Bar */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .grid-header-title-area {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .grid-title {
+            font-size: 1.6rem;
+            color: var(--off-white);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .folder-size-badge {
+            font-family: 'Lato', sans-serif;
+            font-size: 0.85rem;
+            color: var(--bright-red);
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            background: rgba(138, 11, 11, 0.18);
+            border: 1px solid rgba(255, 51, 75, 0.3);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+        }
+
+        .controls-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-width: 280px;
+            flex: 1;
+            max-width: 450px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            color: var(--bright-red);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(15, 12, 15, 0.8);
+            border: 1px solid var(--deep-red);
+            color: var(--off-white);
+            padding: 0.65rem 2.5rem 0.65rem 2.4rem;
+            border-radius: 4px;
+            font-family: 'Lato', sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--bright-red);
+            box-shadow: 0 0 15px rgba(255, 51, 75, 0.3);
+            background: rgba(20, 15, 20, 0.95);
+        }
+
+        .clear-search-btn {
+            position: absolute;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .clear-search-btn:hover {
+            color: var(--bright-red);
+        }
+
+        .dropdown-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .select-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(15, 12, 15, 0.8);
+            border: 1px solid var(--deep-red);
+            border-radius: 4px;
+            padding: 0.2rem 0.6rem;
+            transition: border-color 0.3s;
+        }
+
+        .select-wrapper:hover {
+            border-color: var(--bright-red);
+        }
+
+        .select-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            color: var(--moth-gold);
+            letter-spacing: 0.1em;
+        }
+
+        .gothic-select {
+            background: transparent;
+            border: none;
+            color: var(--off-white);
+            font-family: 'Lato', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.4rem 1.8rem 0.4rem 0.2rem;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .gothic-select option {
+            background: #0f0a0f;
+            color: var(--off-white);
+            padding: 8px;
+        }
+
+        /* File Grid & Cards */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem 1.5rem;
+            padding-bottom: 4rem;
+        }
+
+        .file-card {
+            background: transparent; /* NO BORDER AS REQUESTED */
+            border: none;
+            border-radius: 6px;
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s;
+            position: relative;
+        }
+
+        .file-card:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 51, 75, 0.05);
+        }
+
+        /* Media / Preview Area (NO BORDER AS REQUESTED) */
+        .file-preview {
+            width: 150px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            border: none; /* NO BORDER */
+            background: transparent;
+            position: relative;
+        }
+
+        .file-preview img, .file-preview video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border: none; /* NO BORDER */
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+            border-radius: 4px;
+        }
+
+        .file-icon {
+            font-size: 3.8rem;
+            color: rgba(255, 255, 255, 0.25);
+            transition: all 0.3s;
+            font-family: 'Cinzel', serif;
+            filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+        }
+
+        .file-card:hover .file-icon {
+            color: var(--bright-red);
+            filter: drop-shadow(0 0 12px rgba(255, 51, 75, 0.4));
+            transform: scale(1.08);
+        }
+
+        /* Text & Meta Outside and Below Item (RED TEXT AS REQUESTED) */
+        .file-info {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .file-name {
+            font-size: 0.92rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--bright-red); /* RED TEXT AS REQUESTED */
+            text-align: center;
+            width: 100%;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 0.4rem;
+            line-height: 1.35;
+            transition: color 0.2s;
+        }
+
+        .file-card:hover .file-name {
+            color: #ff6b7d;
+            text-shadow: 0 0 8px rgba(255, 51, 75, 0.4);
+        }
+
+        .file-meta {
+            font-size: 0.72rem;
+            color: rgba(255, 77, 94, 0.7); /* RED META TEXT */
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Purple Search Query Highlight */
+        .highlight-purple {
+            color: var(--purple-glow) !important;
+            text-shadow: 0 0 10px rgba(192, 132, 252, 0.8);
+            font-weight: 900;
+            background: rgba(192, 132, 252, 0.15);
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 50vh;
+            color: rgba(255,255,255,0.25);
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            grid-column: 1 / -1;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .empty-state-sub {
+            font-family: 'Lato', sans-serif;
+            font-size: 0.9rem;
+            color: rgba(255, 51, 75, 0.5);
+            letter-spacing: 0.1em;
+        }
+
+        .load-more-state {
+            text-align: center;
+            padding: 2.5rem;
+            color: var(--moth-gold);
+            font-size: 0.95rem;
+            letter-spacing: 0.15em;
+            grid-column: 1 / -1;
+            background: rgba(212, 175, 55, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Cinzel', serif;
+        }
+        .load-more-state:hover {
+            background: rgba(212, 175, 55, 0.15);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Universal Viewer Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 2, 3, 0.92);
+            backdrop-filter: blur(15px);
+        }
+
+        .modal-container {
+            position: relative;
+            width: 90vw;
+            height: 88vh;
+            max-width: 1400px;
+            background: rgba(15, 10, 15, 0.95);
+            border: 1px solid var(--deep-red);
+            box-shadow: 0 0 40px rgba(138, 11, 11, 0.6), 0 20px 50px rgba(0,0,0,0.9);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1001;
+        }
+
+        .modal-header {
+            padding: 1rem 1.5rem;
+            background: rgba(8, 5, 8, 0.95);
+            border-bottom: 1px solid rgba(255, 51, 75, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--bright-red);
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+
+        .modal-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .modal-btn {
+            background: rgba(138, 11, 11, 0.2);
+            border: 1px solid var(--deep-red);
+            color: var(--off-white);
+            padding: 0.4rem 1rem;
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: var(--deep-red);
+            color: var(--moth-gold);
+            border-color: var(--moth-gold);
+        }
+
+        .close-btn {
+            background: rgba(255, 51, 75, 0.15);
+            border-color: var(--bright-red);
+            color: var(--bright-red);
+            font-weight: bold;
+            padding: 0.4rem 0.8rem;
+        }
+
+        .close-btn:hover {
+            background: var(--bright-red);
+            color: var(--void-black);
+            box-shadow: 0 0 15px var(--bright-red);
+        }
+
+        .modal-content-area {
+            flex: 1;
+            overflow: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        /* Viewer Elements */
+        .viewer-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .viewer-video, .viewer-audio {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            background: #000;
+        }
+
+        .viewer-code {
+            width: 100%;
+            height: 100%;
+            background: #080608;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            overflow: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .viewer-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+            border-radius: 4px;
+        }
+
+        .ufo-preview-card {
+            background: rgba(255, 51, 75, 0.05);
+            border: 1px solid var(--deep-red);
+            padding: 3rem;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 500px;
+        }
+        .ufo-icon { font-size: 5rem; margin-bottom: 1rem; color: var(--moth-orange); }
+
+        /* Custom Media Controls Bar */
+        .media-controls {
+            background: rgba(8, 5, 8, 0.98);
+            border-top: 1px solid var(--deep-red);
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .timeline-container {
+            width: 100%;
+            cursor: pointer;
+            padding: 6px 0;
+        }
+
+        .timeline-bar {
+            width: 100%;
+            height: 8px; /* THICK RED TIMELINE BAR AS REQUESTED */
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--deep-red) 0%, var(--bright-red) 100%);
+            box-shadow: 0 0 12px var(--bright-red);
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .ctrl-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .ctrl-btn {
+            background: rgba(138, 11, 11, 0.25);
+            border: 1px solid var(--deep-red);
+            color: var(--off-white);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .ctrl-btn:hover {
+            background: var(--bright-red);
+            color: var(--void-black);
+            box-shadow: 0 0 15px var(--bright-red);
+            transform: scale(1.05);
+        }
+
+        .time-display {
+            font-family: 'Lato', sans-serif;
+            font-size: 0.9rem;
+            color: var(--moth-gold);
+            min-width: 110px;
+        }
+
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--bright-red);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--bright-red);
+        }
+
+        .kb-hint {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.05em;
+        }
+
+        /* Toasts Feedback */
+        .toast-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(15, 10, 15, 0.95);
+            border-left: 4px solid var(--bright-red);
+            border-top: 1px solid rgba(255, 51, 75, 0.3);
+            border-bottom: 1px solid rgba(255, 51, 75, 0.3);
+            border-right: 1px solid rgba(255, 51, 75, 0.3);
+            color: var(--off-white);
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8), 0 0 15px rgba(255, 51, 75, 0.2);
+            font-family: 'Lato', sans-serif;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+        }
+
+        .toast.toast-gold {
+            border-left-color: var(--moth-gold);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8), 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 900px) {
+            .layout-container { flex-direction: column; }
+            aside { width: 100% !important; border-right: none; border-bottom: 1px solid var(--glass-border); padding: 0.8rem 0; flex-direction: row; overflow-x: auto; }
+            #resizer { display: none; }
+            .category-btn { padding: 0.8rem 1.2rem; border-left: none; border-bottom: 3px solid transparent; font-size: 0.9rem; }
+            .category-btn.active { border-left-color: transparent; border-bottom-color: var(--bright-red); background: linear-gradient(0deg, rgba(138, 11, 11, 0.25) 0%, transparent 100%); }
+            .header-title { font-size: 1.3rem; }
+            .toolbar { flex-direction: column; align-items: stretch; gap: 1rem; }
+            .search-box { max-width: none; }
+            .controls-row { justify-content: center; }
+            .kb-hint { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1 class="header-title">
+                The Vault 
+                <span class="title-badge">[Scroll Bar Version]</span>
+            </h1>
+            <div id="system-status" class="cinzel" style="color: rgba(255,255,255,0.45); letter-spacing: 0.18em; font-size: 0.75rem; transition: color 0.3s;">
+                SYSTEM AWAITING UPLINK
+            </div>
+        </div>
+        <button id="mount-btn" class="mount-btn">Mount Drive</button>
+        <input type="file" id="directory-input" webkitdirectory directory multiple style="display: none;" />
+    </header>
+
+    <div class="layout-container">
+        <aside id="sidebar">
+            <button class="category-btn active" data-category="Pictures">Pictures <span class="cat-count" id="count-Pictures"></span></button>
+            <button class="category-btn" data-category="Videos">Videos <span class="cat-count" id="count-Videos"></span></button>
+            <button class="category-btn" data-category="Audio">Audio <span class="cat-count" id="count-Audio"></span></button>
+            <button class="category-btn" data-category="Documents">Documents <span class="cat-count" id="count-Documents"></span></button>
+            <button class="category-btn" data-category="Code">Code <span class="cat-count" id="count-Code"></span></button>
+            <button class="category-btn" data-category="UFOs">UFOs <span class="cat-count" id="count-UFOs"></span></button>
+        </aside>
+
+        <div id="resizer" title="Drag to resize sidebar (Ctrl+Shift+E to toggle)"></div>
+
+        <main id="main-content">
+            <div class="toolbar">
+                <div class="grid-header-title-area">
+                    <h2 class="grid-title cinzel" id="current-category-title">Pictures</h2>
+                    <span id="category-size-badge" class="folder-size-badge hidden">0 ITEMS • 0 B</span>
+                </div>
+
+                <div class="controls-toolbar">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search signatures in sector..." autocomplete="off">
+                        <button id="clear-search-btn" class="clear-search-btn hidden" title="Clear search">✕</button>
+                    </div>
+
+                    <div class="dropdown-group">
+                        <div class="select-wrapper">
+                            <span class="select-label">SORT:</span>
+                            <select id="sort-select" class="gothic-select">
+                                <option value="name-asc">Name (A ➔ Z)</option>
+                                <option value="name-desc">Name (Z ➔ A)</option>
+                                <option value="size-asc">Size (Smallest)</option>
+                                <option value="size-desc">Size (Largest)</option>
+                            </select>
+                        </div>
+
+                        <div class="select-wrapper">
+                            <span class="select-label">FORMAT:</span>
+                            <select id="format-select" class="gothic-select">
+                                <option value="all">All Formats</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-grid" id="file-grid">
+                <div class="empty-state">
+                    Mount a drive to scan files
+                    <span class="empty-state-sub">Supported sectors: Pictures, Videos, Audio, Documents, Code, & UFOs</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Universal Viewer Modal -->
+    <div id="viewer-modal" class="modal-overlay hidden">
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-file-title">File Title</div>
+                <div class="modal-controls">
+                    <button id="pip-btn" class="modal-btn hidden" title="Picture-in-Picture">🗗 PiP</button>
+                    <button id="close-modal-btn" class="modal-btn close-btn" title="Close (Esc)">✕ ESC</button>
+                </div>
+            </div>
+            <div class="modal-content-area" id="modal-content-area"></div>
+            
+            <!-- Custom Media Controls -->
+            <div id="media-controls" class="media-controls hidden">
+                <div class="timeline-container" id="timeline-container">
+                    <div class="timeline-bar">
+                        <div class="timeline-progress" id="timeline-progress"></div>
+                    </div>
+                </div>
+                <div class="controls-row">
+                    <div class="ctrl-group">
+                        <button id="play-pause-btn" class="ctrl-btn" title="Play/Pause (Space)">▶</button>
+                        <span id="time-display" class="time-display">0:00 / 0:00</span>
+                    </div>
+                    <div class="volume-container">
+                        <button id="mute-btn" class="ctrl-btn" title="Mute/Unmute (M)">🔊</button>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" class="volume-slider">
+                    </div>
+                    <span class="kb-hint">Space: Play/Pause • ↑↓: Vol • M: Mute • Esc: Close</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toasts Feedback Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        // Category Definitions
+        const categoryMap = {
+            'Pictures': ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'avif'],
+            'Videos': ['mp4', 'mkv', 'avi', 'mov', 'webm', 'wmv', 'flv', 'm4v', '3gp', 'ts'],
+            'Audio': ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'opus', 'aiff'],
+            'Documents': ['pdf', 'doc', 'docx', 'txt', 'rtf', 'xls', 'xlsx', 'ppt', 'pptx', 'csv', 'epub', 'odt', 'ods'],
+            'Code': ['js', 'html', 'css', 'py', 'rs', 'jsx', 'ts', 'tsx', 'cpp', 'c', 'h', 'hpp', 'java', 'json', 'md', 'sh', 'php', 'go', 'rb', 'swift', 'kt', 'sql', 'yaml', 'yml', 'xml', 'toml', 'ini', 'bat', 'ps1']
+        };
+
+        // Application State
+        let globalFiles = [];
+        let isScanning = false;
+        let currentCategory = 'Pictures';
+        let searchQuery = '';
+        let currentSort = 'name-asc';
+        let currentFormatFilter = 'all';
+        let categoryScrollPositions = {};
+        let activeMediaEl = null; // Currently playing video/audio element
+        let activeGifInterval = null; // GIF canvas freeze interval if needed
+        let renderLimit = 200;
+        let sidebarExpandedWidth = 280;
+        let isSidebarCollapsed = false;
+
+        // DOM Elements
+        const gridContainer = document.getElementById('file-grid');
+        const categoryTitle = document.getElementById('current-category-title');
+        const categorySizeBadge = document.getElementById('category-size-badge');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const mountBtn = document.getElementById('mount-btn');
+        const directoryInput = document.getElementById('directory-input');
+        const systemStatus = document.getElementById('system-status');
+        const searchInput = document.getElementById('search-input');
+        const clearSearchBtn = document.getElementById('clear-search-btn');
+        const sortSelect = document.getElementById('sort-select');
+        const formatSelect = document.getElementById('format-select');
+        const mainContentEl = document.getElementById('main-content');
+        const sidebarEl = document.getElementById('sidebar');
+        const resizerEl = document.getElementById('resizer');
+
+        // Modal Elements
+        const viewerModal = document.getElementById('viewer-modal');
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalFileTitle = document.getElementById('modal-file-title');
+        const modalContentArea = document.getElementById('modal-content-area');
+        const mediaControls = document.getElementById('media-controls');
+        const pipBtn = document.getElementById('pip-btn');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const timeDisplay = document.getElementById('time-display');
+        const timelineContainer = document.getElementById('timeline-container');
+        const timelineProgress = document.getElementById('timeline-progress');
+        const muteBtn = document.getElementById('mute-btn');
+        const volumeSlider = document.getElementById('volume-slider');
+
+        // Toast Feedback Helper
+        function showToast(message, type = 'red') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'gold' ? 'toast-gold' : ''}`;
+            toast.innerHTML = `<span>${type === 'gold' ? '⚡' : '🛡️'}</span> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        }
+
+        // Helper: Classify File into Category
+        function classifyFile(fileName) {
+            const extMatch = fileName.match(/\.([^\.]+)$/);
+            if (!extMatch) {
+                return { category: 'UFOs', ext: 'UNKNOWN' };
+            }
+            const ext = extMatch[1].toLowerCase();
+            for (const [category, extensions] of Object.entries(categoryMap)) {
+                if (extensions.includes(ext)) {
+                    return { category, ext: ext.toUpperCase() };
+                }
+            }
+            return { category: 'UFOs', ext: ext.toUpperCase() };
+        }
+
+        // Helper: Format Bytes
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Helper: Escape HTML to prevent XSS from malicious filenames
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        // Helper: Escape Regex for Search Highlights
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Helper: Format Time in M:SS
+        function formatTime(seconds) {
+            if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Update Category Counts & Total Folder Sizes
+        function updateCategoryStats() {
+            const stats = {
+                Pictures: { count: 0, bytes: 0 },
+                Videos: { count: 0, bytes: 0 },
+                Audio: { count: 0, bytes: 0 },
+                Documents: { count: 0, bytes: 0 },
+                Code: { count: 0, bytes: 0 },
+                UFOs: { count: 0, bytes: 0 }
+            };
+
+            let totalVaultBytes = 0;
+
+            globalFiles.forEach(f => {
+                if (stats[f.type]) {
+                    stats[f.type].count++;
+                    stats[f.type].bytes += f.sizeBytes;
+                    totalVaultBytes += f.sizeBytes;
+                }
+            });
+
+            for (const cat in stats) {
+                const badgeEl = document.getElementById(`count-${cat}`);
+                if (badgeEl) {
+                    if (stats[cat].count > 0) {
+                        badgeEl.innerText = `${stats[cat].count} • ${formatSize(stats[cat].bytes)}`;
+                    } else {
+                        badgeEl.innerText = '';
+                    }
+                }
+            }
+
+            return totalVaultBytes;
+        }
+
+        // Populate Dynamic Format Dropdown based on Current Category
+        function updateFormatDropdown(category) {
+            const filesInCat = globalFiles.filter(f => f.type === category);
+            const formatCounts = {};
+
+            filesInCat.forEach(f => {
+                formatCounts[f.ext] = (formatCounts[f.ext] || 0) + 1;
+            });
+
+            formatSelect.innerHTML = `<option value="all">All Formats (${filesInCat.length})</option>`;
+            
+            const sortedFormats = Object.keys(formatCounts).sort();
+            sortedFormats.forEach(ext => {
+                const opt = document.createElement('option');
+                opt.value = ext.toLowerCase();
+                opt.innerText = `.${ext} (${formatCounts[ext]})`;
+                formatSelect.appendChild(opt);
+            });
+
+            currentFormatFilter = 'all';
+            formatSelect.value = 'all';
+        }
+
+        // Main Render Function
+        function renderFiles(category) {
+            gridContainer.innerHTML = '';
+            categoryTitle.innerText = category;
+
+            // Calculate current category stats
+            const filesInCat = globalFiles.filter(f => f.type === category);
+            const totalBytesInCat = filesInCat.reduce((acc, f) => acc + f.sizeBytes, 0);
+
+            if (filesInCat.length > 0) {
+                categorySizeBadge.innerText = `${filesInCat.length} ITEMS • ${formatSize(totalBytesInCat)}`;
+                categorySizeBadge.classList.remove('hidden');
+            } else {
+                categorySizeBadge.classList.add('hidden');
+            }
+
+            if (globalFiles.length === 0 && !isScanning) {
+                gridContainer.innerHTML = `<div class="empty-state">
+                    Mount a drive to scan files
+                    <span class="empty-state-sub">Supported sectors: Pictures, Videos, Audio, Documents, Code, & UFOs</span>
+                </div>`;
+                return;
+            }
+
+            // Filter by category
+            let filtered = filesInCat;
+
+            // Filter by Format Dropdown
+            if (currentFormatFilter !== 'all') {
+                filtered = filtered.filter(f => f.ext.toLowerCase() === currentFormatFilter);
+            }
+
+            // Filter by Search Query
+            if (searchQuery.trim() !== '') {
+                const q = searchQuery.trim().toLowerCase();
+                filtered = filtered.filter(f => f.name.toLowerCase().includes(q));
+            }
+
+            // Sorting
+            filtered.sort((a, b) => {
+                if (currentSort === 'name-asc') return a.name.localeCompare(b.name, undefined, { numeric: true });
+                if (currentSort === 'name-desc') return b.name.localeCompare(a.name, undefined, { numeric: true });
+                if (currentSort === 'size-asc') return a.sizeBytes - b.sizeBytes;
+                if (currentSort === 'size-desc') return b.sizeBytes - a.sizeBytes;
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                const scanText = isScanning ? "SCANNING SECTOR..." : "NO SIGNATURES FOUND MATCHING FILTER";
+                gridContainer.innerHTML = `<div class="empty-state">${scanText}</div>`;
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            const actualLimit = Math.min(filtered.length, renderLimit);
+
+            for (let i = 0; i < actualLimit; i++) {
+                const file = filtered[i];
+                const card = document.createElement('div');
+                card.className = 'file-card';
+                card.dataset.id = file.id;
+
+                let iconSymbol = '📄';
+                if (category === 'Pictures') iconSymbol = '📷';
+                if (category === 'Videos') iconSymbol = '🎬';
+                if (category === 'Audio') iconSymbol = '🎵';
+                if (category === 'Code') iconSymbol = '&lt;/&gt;';
+                if (category === 'UFOs') iconSymbol = '🛸';
+
+                // Purple search highlight with XSS protection
+                let safeName = escapeHtml(file.name);
+                let displayName = safeName;
+                if (searchQuery.trim() !== '') {
+                    const regex = new RegExp(`(${escapeRegex(searchQuery.trim())})`, 'gi');
+                    displayName = safeName.replace(regex, `<span class="highlight-purple">$1</span>`);
+                }
+
+                // Notice: NO BORDERS on card or preview area, RED text outside & below!
+                card.innerHTML = `
+                    <div class="file-preview">
+                        <div class="file-icon">${iconSymbol}</div>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name" title="${escapeHtml(file.name)}">${displayName}</div>
+                        <div class="file-meta">${file.ext} • ${file.sizeStr}</div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => openViewer(file));
+                fragment.appendChild(card);
+            }
+
+            gridContainer.appendChild(fragment);
+
+            if (filtered.length > actualLimit) {
+                const loadMoreBtn = document.createElement('div');
+                loadMoreBtn.className = 'load-more-state';
+                loadMoreBtn.innerText = `+ ${filtered.length - actualLimit} MORE ARCHIVES [TAP TO REVEAL 200 MORE]`;
+                loadMoreBtn.addEventListener('click', () => {
+                    renderLimit += 200;
+                    renderFiles(currentCategory);
+                });
+                gridContainer.appendChild(loadMoreBtn);
+            }
+        }
+
+        // Process Directory Files
+        async function processFileList(files) {
+            const skipList = ['node_modules', 'windows', 'program files', 'appdata', '.git', '$recycle.bin'];
+            let nextId = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const path = (file.webkitRelativePath || file.name).toLowerCase();
+                
+                let shouldSkip = false;
+                for (const skipItem of skipList) {
+                    if (path.includes(`/${skipItem}/`)) {
+                        shouldSkip = true;
+                        break;
+                    }
+                }
+
+                if (!shouldSkip) {
+                    const typeInfo = classifyFile(file.name);
+                    globalFiles.push({
+                        id: nextId++,
+                        name: file.name,
+                        type: typeInfo.category,
+                        sizeBytes: file.size,
+                        sizeStr: formatSize(file.size),
+                        ext: typeInfo.ext,
+                        fileObj: file
+                    });
+                }
+
+                if (i % 600 === 0) {
+                    systemStatus.innerText = `SCANNING SECTOR... [${globalFiles.length} FILES CLASSIFIED]`;
+                    await new Promise(r => setTimeout(r, 0));
+                }
+            }
+        }
+
+        // Mount Drive Button Click
+        mountBtn.addEventListener('click', () => {
+            directoryInput.click();
+        });
+
+        // Directory Selection Change
+        directoryInput.addEventListener('change', async (e) => {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+
+            try {
+                globalFiles = [];
+                isScanning = true;
+                mountBtn.disabled = true;
+                systemStatus.innerText = "INITIALIZING ARCHIVE SCAN...";
+                systemStatus.style.color = "var(--moth-orange)";
+
+                renderLimit = 200;
+                renderFiles(currentCategory);
+
+                await processFileList(files);
+
+                isScanning = false;
+                mountBtn.disabled = false;
+                const totalBytes = updateCategoryStats();
+                systemStatus.innerText = `UPLINK SECURE [${globalFiles.length} ARCHIVES • ${formatSize(totalBytes)}]`;
+                systemStatus.style.color = "var(--moth-gold)";
+
+                updateFormatDropdown(currentCategory);
+                renderFiles(currentCategory);
+                showToast(`Mounted drive successfully! ${globalFiles.length} files indexed.`, 'gold');
+            } catch (err) {
+                isScanning = false;
+                mountBtn.disabled = false;
+                systemStatus.innerText = "ACCESS DENIED / SCAN ERROR";
+                systemStatus.style.color = "var(--deep-red)";
+                renderFiles(currentCategory);
+                showToast("Error scanning directory files.", 'red');
+                console.error(err);
+            }
+
+            e.target.value = '';
+        });
+
+        // Category Navigation Click
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const newCat = e.currentTarget.getAttribute('data-category');
+                if (newCat === currentCategory) return;
+
+                // Save old scroll position
+                categoryScrollPositions[currentCategory] = mainContentEl.scrollTop;
+
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                currentCategory = newCat;
+                renderLimit = 200;
+
+                updateFormatDropdown(currentCategory);
+
+                gridContainer.style.opacity = '0';
+                setTimeout(() => {
+                    renderFiles(currentCategory);
+                    gridContainer.style.transition = 'opacity 0.2s ease';
+                    gridContainer.style.opacity = '1';
+                    
+                    // Restore previous scroll position exactly where left off!
+                    requestAnimationFrame(() => {
+                        mainContentEl.scrollTop = categoryScrollPositions[currentCategory] || 0;
+                    });
+                }, 120);
+            });
+        });
+
+        // Search Bar Event Listeners
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            if (searchQuery.trim() !== '') {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+            renderFiles(currentCategory);
+        });
+
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            searchQuery = '';
+            clearSearchBtn.classList.add('hidden');
+            renderFiles(currentCategory);
+            searchInput.focus();
+        });
+
+        // Sort Selection Change
+        sortSelect.addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            renderFiles(currentCategory);
+        });
+
+        // Format Filter Change
+        formatSelect.addEventListener('change', (e) => {
+            currentFormatFilter = e.target.value;
+            renderLimit = 200;
+            renderFiles(currentCategory);
+        });
+
+        // Sidebar Resizer & Toggle Logic
+        let isResizing = false;
+
+        resizerEl.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            resizerEl.classList.add('resizing');
+            document.body.style.cursor = 'ew-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            const maxWidth = window.innerWidth * 0.3;
+            let newWidth = e.clientX;
+            
+            if (newWidth < 40) {
+                newWidth = 0;
+                isSidebarCollapsed = true;
+            } else if (newWidth > maxWidth) {
+                newWidth = maxWidth;
+                isSidebarCollapsed = false;
+            } else {
+                sidebarExpandedWidth = newWidth;
+                isSidebarCollapsed = false;
+            }
+
+            sidebarEl.style.width = `${newWidth}px`;
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                resizerEl.classList.remove('resizing');
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+        });
+
+        function toggleSidebar() {
+            if (isSidebarCollapsed || sidebarEl.style.width === '0px') {
+                sidebarEl.style.width = `${sidebarExpandedWidth}px`;
+                isSidebarCollapsed = false;
+                showToast("Sidebar Restored", 'gold');
+            } else {
+                sidebarExpandedWidth = sidebarEl.offsetWidth || 280;
+                sidebarEl.style.width = '0px';
+                isSidebarCollapsed = true;
+                showToast("Sidebar Concealed (Ctrl+Shift+E)", 'red');
+            }
+        }
+
+        // Universal Viewer Modal Implementation
+        let activeObjUrl = null;
+
+        function closeViewer() {
+            if (activeMediaEl) {
+                activeMediaEl.pause();
+                activeMediaEl = null;
+            }
+            if (activeGifInterval) {
+                clearInterval(activeGifInterval);
+                activeGifInterval = null;
+            }
+            if (activeObjUrl) {
+                URL.revokeObjectURL(activeObjUrl);
+                activeObjUrl = null;
+            }
+            viewerModal.classList.add('hidden');
+            modalContentArea.innerHTML = '';
+            mediaControls.classList.add('hidden');
+            pipBtn.classList.add('hidden');
+        }
+
+        closeModalBtn.addEventListener('click', closeViewer);
+        modalBackdrop.addEventListener('click', closeViewer);
+
+        async function openViewer(fileItem) {
+            modalFileTitle.innerText = `${fileItem.name} (${fileItem.sizeStr})`;
+            modalContentArea.innerHTML = '<div class="cinzel" style="color: var(--moth-gold); letter-spacing: 0.2em;">DECRYPTING DATA...</div>';
+            viewerModal.classList.remove('hidden');
+            mediaControls.classList.add('hidden');
+            pipBtn.classList.add('hidden');
+
+            const file = fileItem.fileObj;
+            if (!file) {
+                modalContentArea.innerHTML = '<div class="cinzel" style="color: var(--deep-red);">FILE OBJECT LOST OR UNLINKED</div>';
+                showToast("Cannot read file payload.", 'red');
+                return;
+            }
+
+            try {
+                activeObjUrl = URL.createObjectURL(file);
+
+                if (fileItem.type === 'Pictures') {
+                    const isGif = fileItem.ext === 'GIF';
+                    const img = document.createElement('img');
+                    img.src = activeObjUrl;
+                    img.className = 'viewer-image';
+                    img.id = 'viewer-media-img';
+                    
+                    modalContentArea.innerHTML = '';
+                    modalContentArea.appendChild(img);
+
+                    if (isGif) {
+                        mediaControls.classList.remove('hidden');
+                        timelineContainer.style.display = 'none'; // No timeline for GIF
+                        timeDisplay.innerText = 'GIF • PLAYING';
+                        playPauseBtn.innerText = '⏸';
+                        
+                        let isPaused = false;
+                        const canvas = document.createElement('canvas');
+                        canvas.className = 'viewer-image hidden';
+                        modalContentArea.appendChild(canvas);
+
+                        playPauseBtn.onclick = () => {
+                            isPaused = !isPaused;
+                            if (isPaused) {
+                                canvas.width = img.naturalWidth || img.width;
+                                canvas.height = img.naturalHeight || img.height;
+                                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                                img.classList.add('hidden');
+                                canvas.classList.remove('hidden');
+                                playPauseBtn.innerText = '▶';
+                                timeDisplay.innerText = 'GIF • FROZEN';
+                                showToast("GIF Paused", 'gold');
+                            } else {
+                                canvas.classList.add('hidden');
+                                img.classList.remove('hidden');
+                                playPauseBtn.innerText = '⏸';
+                                timeDisplay.innerText = 'GIF • PLAYING';
+                                showToast("GIF Resumed", 'gold');
+                            }
+                        };
+                    }
+                } else if (fileItem.type === 'Videos' || fileItem.type === 'Audio') {
+                    const isVideo = fileItem.type === 'Videos';
+                    const media = document.createElement(isVideo ? 'video' : 'audio');
+                    media.src = activeObjUrl;
+                    media.className = isVideo ? 'viewer-video' : 'viewer-audio';
+                    media.controls = false; // Custom Gothic controls!
+                    media.setAttribute('controlsList', 'nodownload'); // NO DOWNLOAD BUTTON AS REQUESTED
+                    media.autoplay = true;
+
+                    modalContentArea.innerHTML = '';
+                    if (isVideo) {
+                        modalContentArea.appendChild(media);
+                        if (document.pictureInPictureEnabled) {
+                            pipBtn.classList.remove('hidden');
+                            pipBtn.onclick = async () => {
+                                try {
+                                    if (document.pictureInPictureElement) {
+                                        await document.exitPictureInPicture();
+                                    } else {
+                                        await media.requestPictureInPicture();
+                                        showToast("Picture-in-Picture Activated", 'gold');
+                                    }
+                                } catch (err) {
+                                    showToast("PiP Mode Failed", 'red');
+                                }
+                            };
+                        }
+                    } else {
+                        modalContentArea.innerHTML = `
+                            <div style="text-align: center; padding: 4rem;">
+                                <div style="font-size: 6rem; color: var(--bright-red); margin-bottom: 1.5rem; text-shadow: 0 0 25px var(--bright-red);">🎵</div>
+                                <h3 class="cinzel" style="font-size: 1.6rem; color: var(--off-white); margin-bottom: 0.5rem;">${escapeHtml(fileItem.name)}</h3>
+                                <div style="color: var(--moth-gold); letter-spacing: 0.15em;">AUDIO STREAM ACTIVE</div>
+                            </div>
+                        `;
+                        modalContentArea.appendChild(media);
+                    }
+
+                    activeMediaEl = media;
+                    mediaControls.classList.remove('hidden');
+                    timelineContainer.style.display = 'block';
+                    playPauseBtn.innerText = '⏸';
+
+                    // Update time & progress
+                    media.ontimeupdate = () => {
+                        if (media.duration) {
+                            const pct = (media.currentTime / media.duration) * 100;
+                            timelineProgress.style.width = `${pct}%`;
+                            timeDisplay.innerText = `${formatTime(media.currentTime)} / ${formatTime(media.duration)}`;
+                        }
+                    };
+
+                    media.onended = () => {
+                        playPauseBtn.innerText = '▶';
+                    };
+
+                    playPauseBtn.onclick = () => {
+                        if (media.paused) {
+                            media.play();
+                            playPauseBtn.innerText = '⏸';
+                        } else {
+                            media.pause();
+                            playPauseBtn.innerText = '▶';
+                        }
+                    };
+
+                    timelineContainer.onclick = (e) => {
+                        const rect = timelineContainer.getBoundingClientRect();
+                        const pos = (e.clientX - rect.left) / rect.width;
+                        media.currentTime = pos * media.duration;
+                    };
+
+                    muteBtn.onclick = () => {
+                        media.muted = !media.muted;
+                        muteBtn.innerText = media.muted ? '🔇' : '🔊';
+                        showToast(media.muted ? "Audio Muted (M)" : "Audio Restored", 'gold');
+                    };
+
+                    volumeSlider.oninput = (e) => {
+                        media.volume = e.target.value;
+                        media.muted = false;
+                        muteBtn.innerText = media.volume === 0 ? '🔇' : '🔊';
+                    };
+                } else if (fileItem.type === 'Documents' || fileItem.type === 'Code') {
+                    if (fileItem.ext === 'PDF') {
+                        modalContentArea.innerHTML = `<iframe src="${activeObjUrl}" class="viewer-iframe"></iframe>`;
+                    } else if (['TXT', 'MD', 'JSON', 'CSV', 'JS', 'HTML', 'CSS', 'PY', 'RS', 'TS', 'JSX', 'TSX', 'CPP', 'C', 'JAVA', 'SH', 'PHP', 'XML', 'YAML', 'YML', 'TOML'].includes(fileItem.ext)) {
+                        const textContent = await file.text();
+                        const pre = document.createElement('pre');
+                        pre.className = 'viewer-code';
+                        pre.textContent = textContent;
+                        modalContentArea.innerHTML = '';
+                        modalContentArea.appendChild(pre);
+                    } else {
+                        modalContentArea.innerHTML = `
+                            <div class="ufo-preview-card">
+                                <div class="ufo-icon">📑</div>
+                                <h3 class="cinzel" style="color: var(--bright-red); font-size: 1.4rem;">${escapeHtml(fileItem.name)}</h3>
+                                <p style="color: rgba(255,255,255,0.7); margin-top: 1rem;">Document format (${fileItem.ext}). In-app preview renders file signature & metadata.</p>
+                                <div style="margin-top: 1.5rem; color: var(--moth-gold); font-size: 0.85rem; letter-spacing: 0.1em;">SIZE: ${fileItem.sizeStr} • READ ONLY ARCHIVE</div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    // UFOs / Unknown binary formats
+                    modalContentArea.innerHTML = `
+                        <div class="ufo-preview-card">
+                            <div class="ufo-icon">🛸</div>
+                            <h3 class="cinzel" style="color: var(--bright-red); font-size: 1.4rem;">${escapeHtml(fileItem.name)}</h3>
+                            <p style="color: rgba(255,255,255,0.7); margin-top: 1rem;">Unidentified File Object (${fileItem.ext}). Binary payload concealed for system security.</p>
+                            <div style="margin-top: 1.5rem; color: var(--moth-gold); font-size: 0.85rem; letter-spacing: 0.1em;">SECTOR: UFOS • SIZE: ${fileItem.sizeStr}</div>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                modalContentArea.innerHTML = '<div class="cinzel" style="color: var(--deep-red);">ERROR DECRYPTING PAYLOAD</div>';
+                showToast("Error opening file viewer.", 'red');
+                console.error(err);
+            }
+        }
+
+        // Universal Keyboard Controls & Guardrails
+        window.addEventListener('keydown', (e) => {
+            // Check if user is typing in search bar
+            if (document.activeElement === searchInput) return;
+
+            // Universal Esc to close modal
+            if (e.key === 'Escape') {
+                if (!viewerModal.classList.contains('hidden')) {
+                    e.preventDefault();
+                    closeViewer();
+                }
+            }
+
+            // Controls when viewer is open
+            if (!viewerModal.classList.contains('hidden')) {
+                // Universal Space to play/pause audio, video, or GIF
+                if (e.code === 'Space') {
+                    e.preventDefault(); // Prevent scroll
+                    if (playPauseBtn && !mediaControls.classList.contains('hidden')) {
+                        playPauseBtn.click();
+                    }
+                }
+
+                // Volume Up/Down arrow keys for Video/Audio (prevent scroll)
+                if (activeMediaEl) {
+                    if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        activeMediaEl.volume = Math.min(1, activeMediaEl.volume + 0.1);
+                        volumeSlider.value = activeMediaEl.volume;
+                        showToast(`Volume: ${Math.round(activeMediaEl.volume * 100)}%`, 'gold');
+                    }
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        activeMediaEl.volume = Math.max(0, activeMediaEl.volume - 0.1);
+                        volumeSlider.value = activeMediaEl.volume;
+                        showToast(`Volume: ${Math.round(activeMediaEl.volume * 100)}%`, 'gold');
+                    }
+                    if (e.key === 'm' || e.key === 'M') {
+                        e.preventDefault();
+                        muteBtn.click();
+                    }
+                }
+            }
+        });
+
+        // Prevent default spacebar scroll on body when not in input
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target === document.body && viewerModal.classList.contains('hidden')) {
+                e.preventDefault();
+            }
+        });
+
+        // Initial Setup
+        updateFormatDropdown('Pictures');
+    </script>
+</body>
+</html>
