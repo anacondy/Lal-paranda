@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lal-paranda: The Vault | Advanced File Explorer</title>
+    <title>Lal-paranda: The Vault | Ultimate File Explorer</title>
     <link href="https://fonts.bunny.net/css?family=cinzel:400,700,900|lato:300,400,700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -36,7 +36,7 @@
             user-select: none; -webkit-user-select: none;
         }
 
-        /* STRICT OG CRIMSON RED SCROLLBAR GLOBALLY - NEVER ORANGE/YELLOW */
+        /* STRICT OG CRIMSON RED SCROLLBAR GLOBALLY */
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: var(--void-black); }
         ::-webkit-scrollbar-thumb { background: var(--deep-red); border-radius: 5px; border: 2px solid var(--void-black); }
@@ -45,7 +45,7 @@
 
         h1, h2, h3, .cinzel { font-family: 'Cinzel', serif; }
 
-        /* COMPACT HEADER WITH CENTRALLY ALIGNED TOTAL ITEMS & SIZE STATS */
+        /* HEADER */
         header {
             padding: 0.8rem 2rem;
             border-bottom: 1px solid var(--glass-border);
@@ -95,7 +95,7 @@
         .speed-bar-container { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.06); position: relative; overflow: hidden; z-index: 11; display: none; flex-shrink: 0; }
         .speed-bar-fill { height: 100%; background: linear-gradient(90deg, var(--deep-red) 0%, var(--bright-red) 50%, var(--moth-gold) 100%); width: 0%; transition: width 0.1s linear; box-shadow: 0 0 12px var(--bright-red); }
 
-        /* LIFTED COMPACT TOOLBAR */
+        /* TOOLBAR */
         .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 1.2rem; padding: 0.6rem 2rem; background: rgba(255,255,255,0.015); border-bottom: 1px solid var(--glass-border); z-index: 9; flex-shrink: 0; }
         .search-wrapper { position: relative; flex: 1; min-width: 280px; display: flex; align-items: center; }
         .search-box { width: 100%; background: rgba(12, 10, 12, 0.85); border: 1px solid var(--deep-red); color: var(--off-white); padding: 0.55rem 2.5rem 0.55rem 1.2rem; font-family: 'Lato', sans-serif; font-size: 0.95rem; border-radius: 4px; outline: none; transition: all 0.3s; }
@@ -145,10 +145,27 @@
         .grid-title { font-size: 1.5rem; color: var(--off-white); letter-spacing: 0.15em; text-transform: uppercase; margin: 0; }
         .sector-size-label { font-size: 0.85rem; color: var(--bright-red); font-weight: bold; letter-spacing: 0.08em; }
 
+        /* ALPHABET FAST JUMP BAR (Right Side along Scrollbar) */
+        .alphabet-sidebar {
+            position: fixed; right: 14px; top: 115px; bottom: 25px; width: 22px;
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+            background: rgba(8, 5, 8, 0.8); border: 1px solid rgba(138, 11, 11, 0.4);
+            border-radius: 12px; padding: 6px 0; z-index: 100; backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        }
+        .alpha-letter {
+            font-family: 'Cinzel', serif; font-size: 0.68rem; font-weight: 900;
+            color: rgba(255, 255, 255, 0.45); cursor: pointer; transition: all 0.15s;
+            width: 100%; text-align: center; line-height: 1;
+        }
+        .alpha-letter:hover, .alpha-letter.active {
+            color: var(--moth-gold); text-shadow: 0 0 10px var(--moth-gold); transform: scale(1.4);
+        }
+
         /* === VIEW MODES === */
         .file-container { display: grid; gap: 1.8rem 1.5rem; padding-bottom: 4rem; }
         
-        /* Grid View - STRICT 16:9 RATIO WITH OBJECT-FIT: CONTAIN */
+        /* Grid View */
         .file-container.grid-view { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
         .grid-view .file-card {
             background: transparent; border: none; cursor: pointer;
@@ -210,16 +227,16 @@
         .lightbox-close:hover { background: var(--bright-red); color: var(--void-black); box-shadow: 0 0 15px var(--bright-red); }
         .lightbox-close.fade-away { opacity: 0; pointer-events: none; }
         
-        .lightbox-content { width: 100%; height: 100%; max-width: 1600px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; padding: 2rem 1rem; }
-        .lightbox-content.blurred { filter: blur(15px); transition: filter 0.3s; }
+        .lightbox-content { width: 100%; height: 100%; max-width: 1600px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; padding: 2.5rem 1rem; }
+        .lightbox-content.blurred { filter: blur(16px); transition: filter 0.3s; }
         
-        .viewer-media-el { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; box-shadow: 0 15px 45px rgba(0,0,0,0.9); background: transparent; border: none; transition: transform 0.25s ease-out; }
-        .viewer-media-el.zoomed { transform: scale(2); cursor: zoom-out; }
+        .viewer-media-el { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; box-shadow: 0 15px 45px rgba(0,0,0,0.9); background: transparent; border: none; transition: transform 0.15s ease-out; }
+        .viewer-media-el.zoomed { cursor: grab; }
+        .viewer-media-el.zoomed:active { cursor: grabbing; }
         
         .viewer-iframe { width: 85vw; height: 82vh; background: #fff; border: none; border-radius: 6px; box-shadow: 0 15px 45px rgba(0,0,0,0.9); }
         .viewer-code { width: 85vw; height: 82vh; background: #0b080b; color: #f8f8f2; padding: 2.5rem; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; line-height: 1.5; overflow-y: auto; border: 1px solid rgba(255, 51, 75, 0.3); white-space: pre-wrap; word-break: break-word; outline: none; }
         
-        /* Title Placed Above Photos & Videos */
         .lightbox-title { position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%); font-family: 'Cinzel', serif; letter-spacing: 0.12em; color: var(--bright-red); font-size: 1.25rem; font-weight: 900; text-align: center; max-width: 75%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10001; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
 
         /* TRANSPARENT BORDERLESS OVERLAY PLAYER */
@@ -247,12 +264,10 @@
         
         #cp-time { color: var(--moth-gold); width: 120px; text-align: right; }
 
-        /* Pulsing 3D Music Artwork */
         .audio-poster-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 0; }
         .audio-poster { font-size: 8.5rem; color: var(--bright-red); text-shadow: 0 0 50px rgba(255, 51, 75, 0.8); margin-bottom: 1.5rem; animation: pulseAudio 2s infinite ease-in-out; }
         @keyframes pulseAudio { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
         
-        /* Smooth Animated Volume OSD */
         .vol-osd {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
             font-size: 6rem; color: var(--bright-red); font-family: 'Cinzel', serif; font-weight: 900;
@@ -261,45 +276,50 @@
         }
         .vol-osd.active { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
         
-        /* Tapping L/R Arrows - Unselectable */
         .nav-hint { position: absolute; top: 50%; transform: translateY(-50%); width: 60px; height: 86px; background: rgba(10,8,10,0.65); border: 1px solid var(--glass-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; color: rgba(255,255,255,0.5); cursor: pointer; opacity: 0; transition: all 0.25s; z-index: 10002; user-select: none; -webkit-user-select: none; }
         .nav-hint.left { left: 25px; }
         .nav-hint.right { right: 25px; }
         #lightbox:hover .nav-hint { opacity: 1; }
         .nav-hint:hover { background: var(--deep-red); color: var(--moth-gold); border-color: var(--moth-gold); box-shadow: 0 0 18px var(--bright-red); }
 
-        /* Alt + Enter Metadata Overlay (Click empty space to dismiss) */
+        /* BORDERLESS ALT + ENTER METADATA ON BLURRED MEDIA */
         .metadata-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 3, 5, 0.85); backdrop-filter: blur(16px); z-index: 10004;
+            background: transparent; z-index: 10004;
             display: flex; align-items: center; justify-content: center;
             opacity: 1; transition: opacity 0.3s; padding: 2rem;
         }
         .metadata-overlay.hidden { opacity: 0; pointer-events: none; }
         .metadata-card {
-            background: rgba(15, 10, 15, 0.98); border: 1px solid var(--bright-red);
-            padding: 2.5rem 3.5rem; border-radius: 8px; box-shadow: 0 0 35px rgba(255, 51, 75, 0.5);
-            max-width: 650px; width: 100%; color: var(--off-white); font-family: 'Lato', sans-serif;
-            text-align: left; position: relative;
+            background: transparent; border: none; box-shadow: none;
+            max-width: 800px; width: 100%; color: var(--off-white); font-family: 'Lato', sans-serif;
+            text-shadow: 0 4px 18px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.8);
+            text-align: left;
         }
-        .metadata-card h3 { font-family: 'Cinzel', serif; color: var(--bright-red); margin-top: 0; border-bottom: 1px solid var(--deep-red); padding-bottom: 0.8rem; font-size: 1.3rem; letter-spacing: 0.1em; }
-        .meta-row { margin: 0.9rem 0; font-size: 0.95rem; word-break: break-all; }
-        .meta-label { color: var(--moth-gold); font-weight: bold; width: 110px; display: inline-block; font-family: 'Cinzel', serif; font-size: 0.85rem; }
+        .metadata-card h3 { font-family: 'Cinzel', serif; color: var(--bright-red); margin-top: 0; border-bottom: 1px solid var(--deep-red); padding-bottom: 0.8rem; font-size: 1.4rem; letter-spacing: 0.1em; }
+        .meta-row { margin: 1rem 0; font-size: 1.05rem; display: flex; align-items: center; }
+        .meta-label { color: var(--moth-gold); font-weight: bold; width: 130px; flex-shrink: 0; font-family: 'Cinzel', serif; font-size: 0.9rem; }
+        .meta-val-single { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; color: var(--off-white); font-weight: 700; }
+        
+        .copy-btn { background: rgba(138, 11, 11, 0.4); border: 1px solid var(--bright-red); color: var(--bright-red); font-family: 'Cinzel', serif; font-size: 0.75rem; padding: 3px 10px; border-radius: 4px; cursor: pointer; margin-left: 12px; transition: all 0.2s; }
+        .copy-btn:hover { background: var(--bright-red); color: var(--void-black); box-shadow: 0 0 12px var(--bright-red); }
+
+        /* Toast Notifications */
+        .toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 20000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .gothic-toast { background: rgba(15, 10, 15, 0.95); border-left: 4px solid var(--moth-gold); border: 1px solid rgba(212,175,55,0.3); color: var(--off-white); padding: 1rem 1.6rem; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), 0 0 15px rgba(212,175,55,0.2); font-family: 'Lato', sans-serif; font-size: 0.95rem; font-weight: bold; pointer-events: auto; animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         .ufo-card { background: rgba(255, 51, 75, 0.05); border: 1px solid var(--deep-red); padding: 3rem; border-radius: 8px; text-align: center; max-width: 500px; width: 100%; word-break: break-word; overflow-wrap: anywhere; }
         .ufo-icon { font-size: 5rem; margin-bottom: 1rem; color: var(--moth-orange); }
 
         .hidden { display: none !important; }
 
-        /* Fullscreen Movie Sizing Fix */
-        :fullscreen .viewer-media-el, :-webkit-full-screen .viewer-media-el {
-            max-width: 100vw; max-height: 100vh; width: 100%; height: 100%;
-        }
+        :fullscreen .viewer-media-el, :-webkit-full-screen .viewer-media-el { max-width: 100vw; max-height: 100vh; width: 100%; height: 100%; }
 
         @media (max-width: 900px) {
             .layout-container { flex-direction: column; }
             aside { width: 100% !important; border-right: none; border-bottom: 1px solid var(--glass-border); padding: 0.6rem 0; flex-direction: row; overflow-x: auto; }
-            .resizer { display: none; }
+            .resizer, .alphabet-sidebar { display: none; }
             .category-btn { padding: 0.7rem 1.1rem; border-left: none; border-bottom: 3px solid transparent; font-size: 0.88rem; }
             .category-btn.active { border-left-color: transparent; border-bottom-color: var(--bright-red); background: linear-gradient(0deg, rgba(138, 11, 11, 0.28) 0%, transparent 100%); }
             .toolbar { flex-direction: column; align-items: stretch; gap: 0.8rem; padding: 0.8rem 1.5rem; }
@@ -307,6 +327,7 @@
             .nav-hint { display: none; }
             .control-buttons { flex-direction: column; gap: 0.5rem; }
             .cp-vol-readout, #cp-time { width: 100%; text-align: center; }
+            .meta-row { flex-direction: column; align-items: flex-start; gap: 4px; }
         }
     </style>
 </head>
@@ -316,7 +337,6 @@
             <h1 class="header-title cinzel">The Vault</h1>
         </div>
         
-        <!-- Central Top Stats Bar Readout -->
         <div id="header-center-stats" class="header-center-stats">
             0 ITEMS • 0 B
         </div>
@@ -329,7 +349,6 @@
         <div class="speed-bar-fill" id="scan-progress-bar"></div>
     </div>
 
-    <!-- Lifted Toolbar -->
     <div class="toolbar">
         <div class="search-wrapper">
             <input type="text" id="search-input" class="search-box" placeholder="Search across all sectors... (Ctrl+K)" autocomplete="off">
@@ -375,6 +394,9 @@
                 </div>
             </div>
         </main>
+
+        <!-- Alphabet Quick Jump Bar (Right Side along Scrollbar) -->
+        <div id="alphabet-sidebar" class="alphabet-sidebar hidden"></div>
     </div>
 
     <!-- Lightbox Modal -->
@@ -387,24 +409,43 @@
         <div class="lightbox-title" id="lb-title"></div>
         <div class="lightbox-content" id="lb-content"></div>
 
-        <!-- Alt + Enter Metadata Overlay (Tap empty corners to dismiss) -->
+        <!-- Borderless Alt + Enter Metadata Overlay directly on Blurred Media -->
         <div id="metadata-overlay" class="metadata-overlay hidden">
-            <div class="metadata-card" id="metadata-card">
-                <h3>FILE SPEC METADATA</h3>
-                <div class="meta-row"><span class="meta-label">NAME:</span> <span id="meta-name"></span></div>
-                <div class="meta-row"><span class="meta-label">PATH:</span> <span id="meta-path"></span></div>
-                <div class="meta-row"><span class="meta-label">SECTOR:</span> <span id="meta-sector"></span></div>
-                <div class="meta-row"><span class="meta-label">FORMAT:</span> <span id="meta-format"></span></div>
-                <div class="meta-row"><span class="meta-label">SIZE:</span> <span id="meta-size"></span></div>
-                <div class="meta-row"><span class="meta-label">MODIFIED:</span> <span id="meta-date"></span></div>
-                <div style="font-size:0.8rem; color:var(--moth-gold); margin-top:2rem; text-align:center;">[Tap empty space around card or press Esc to dismiss]</div>
+            <div class="metadata-card">
+                <h3>FILE SIGNATURE SPECS</h3>
+                <div class="meta-row"><span class="meta-label">NAME:</span> <span id="meta-name" class="meta-val-single"></span></div>
+                <div class="meta-row">
+                    <span class="meta-label">STORAGE PATH:</span> 
+                    <span id="meta-path" class="meta-val-single" style="cursor:pointer; color:var(--bright-red);" title="Double tap to copy path"></span>
+                    <button id="copy-path-btn" class="copy-btn">📋 COPY</button>
+                </div>
+                <div class="meta-row"><span class="meta-label">SECTOR:</span> <span id="meta-sector" class="meta-val-single"></span></div>
+                <div class="meta-row"><span class="meta-label">FORMAT:</span> <span id="meta-format" class="meta-val-single"></span></div>
+                <div class="meta-row"><span class="meta-label">SIZE:</span> <span id="meta-size" class="meta-val-single"></span></div>
+                <div class="meta-row"><span class="meta-label">MODIFIED:</span> <span id="meta-date" class="meta-val-single"></span></div>
+                <div style="font-size:0.8rem; color:var(--moth-gold); margin-top:2.2rem; text-align:center; font-family:'Cinzel',serif;">[Tap empty space around specs or press Alt+Enter / Esc to dismiss]</div>
             </div>
         </div>
     </div>
 
+    <div id="toast-container" class="toast-container"></div>
+
     <script>
-        // Disable Right Click Menu (Immersion Fix)
         window.addEventListener('contextmenu', e => e.preventDefault());
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'gothic-toast';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
 
         let nextFileIdCounter = 1;
         function generateId() { return 'file_' + (nextFileIdCounter++); }
@@ -423,7 +464,6 @@
         }
         const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        // Application State
         let globalFiles = []; 
         let fileLookupMap = {}; 
         let currentRenderedFiles = []; 
@@ -441,7 +481,6 @@
         let lastSidebarWidth = 250;
         let isSidebarCollapsed = false;
 
-        // DOM Elements
         const gridContainer = document.getElementById('file-grid');
         const searchInput = document.getElementById('search-input');
         const clearSearchBtn = document.getElementById('clear-search');
@@ -456,6 +495,7 @@
         const sidebar = document.getElementById('sidebar');
         const resizer = document.getElementById('resizer');
         const mainContent = document.getElementById('main-content');
+        const alphabetSidebar = document.getElementById('alphabet-sidebar');
         
         const lightbox = document.getElementById('lightbox');
         const lbContent = document.getElementById('lb-content');
@@ -465,6 +505,38 @@
         const navLeft = document.getElementById('nav-left');
         const navRight = document.getElementById('nav-right');
         const metadataOverlay = document.getElementById('metadata-overlay');
+        const copyPathBtn = document.getElementById('copy-path-btn');
+        const metaPathEl = document.getElementById('meta-path');
+
+        // Populate Alphabet Sidebar
+        const alphabetsList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+        alphabetsList.forEach(char => {
+            const span = document.createElement('span');
+            span.className = 'alpha-letter';
+            span.innerText = char;
+            span.addEventListener('click', () => jumpToAlpha(char));
+            alphabetSidebar.appendChild(span);
+        });
+
+        function jumpToAlpha(char) {
+            const isDesc = sortSelect.value === 'name-desc';
+            const target = char === '#' ? (isDesc ? 'Z' : '0') : char;
+            
+            const matchIdx = currentRenderedFiles.findIndex(f => {
+                const firstChar = f.name.charAt(0).toUpperCase();
+                return char === '#' ? !/[A-Z]/.test(firstChar) : firstChar >= char;
+            });
+
+            if (matchIdx !== -1) {
+                if (matchIdx >= renderLimit) {
+                    const oldLimit = renderLimit;
+                    renderLimit = Math.max(renderLimit, matchIdx + 150);
+                    renderBatch(oldLimit, Math.min(currentRenderedFiles.length, renderLimit));
+                }
+                const cardEl = gridContainer.querySelector(`[data-id="${currentRenderedFiles[matchIdx].id}"]`);
+                if (cardEl) cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
 
         // Resizer Snap
         let isResizing = false;
@@ -511,7 +583,6 @@
             activeObjectUrls = [];
         }
 
-        // Virtualized Lazy Loader (Loads Pictures AND Video Previews without PiP)
         const lazyObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -528,7 +599,6 @@
                             if (f.type === 'Pictures') {
                                 previewArea.innerHTML = `<img src="${url}" class="preview-img" alt="preview">`;
                             } else if (f.type === 'Videos' && currentView === 'grid') {
-                                // Extract frame 1 smoothly with floating PiP suppressed
                                 previewArea.innerHTML = `<video src="${url}#t=1" class="preview-video" preload="metadata" muted playsinline disablepictureinpicture></video>`;
                             }
                         }
@@ -538,7 +608,6 @@
             });
         }, { root: mainContent, rootMargin: '450px' });
 
-        // Zero-Lag Infinite Scroll Batch Appender
         function renderBatch(startIdx, endIdx) {
             const fragment = document.createDocumentFragment();
             const searchVal = searchInput.value.toLowerCase().trim();
@@ -569,13 +638,13 @@
                 if (currentView === 'grid') {
                     card.innerHTML = `
                         <div class="preview-area"><div class="fallback-icon">${iconSymbol}</div></div>
-                        <div class="file-name" title="${safeName}">${displayName}</div>
+                        <div class="file-name">${displayName}</div>
                         <div class="file-meta">${f.ext}</div>
                     `;
                 } else {
                     card.innerHTML = `
                         <div class="preview-area"><div class="fallback-icon">${iconSymbol}</div></div>
-                        <div class="file-name" title="${safeName}">${displayName}</div>
+                        <div class="file-name">${displayName}</div>
                         <div class="file-meta-row">
                             <div class="file-date">${f.dateStr}</div>
                             <div class="file-meta">${f.ext}</div>
@@ -633,7 +702,6 @@
             }
         }
 
-        // Main UI Renderer
         function updateUI(keepScroll = false) {
             cleanupUrls();
             gridContainer.innerHTML = '';
@@ -648,7 +716,6 @@
                 
             updateCategoryCounts(searchFilteredGlobal);
 
-            // Update Header Central Stats Readout
             const totalVaultBytes = globalFiles.reduce((a, f) => a + f.rawSize, 0);
             headerCenterStats.innerText = globalFiles.length > 0 ? `${globalFiles.length} ITEMS • ${formatSize(totalVaultBytes)}` : "0 ITEMS • 0 B";
 
@@ -658,11 +725,11 @@
                     <span class="empty-state-sub">Client-Side sandboxed HTML5 file indexer</span>
                 </div>`;
                 sectorSizeLabel.innerText = "0 B";
+                alphabetSidebar.classList.add('hidden');
                 currentRenderedFiles = [];
                 return;
             }
 
-            // Global Cross-Folder Search
             let catFiles = isGlobalSearch ? searchFilteredGlobal : searchFilteredGlobal.filter(f => f.type === currentCategory);
             
             if (isGlobalSearch) {
@@ -687,6 +754,13 @@
                 });
             }
 
+            // Toggle Alphabet Fast Jump Sidebar
+            if (['name-asc', 'name-desc'].includes(sortVal) && !isGlobalSearch) {
+                alphabetSidebar.classList.remove('hidden');
+            } else {
+                alphabetSidebar.classList.add('hidden');
+            }
+
             currentRenderedFiles = catFiles; 
             const totalCatBytes = catFiles.reduce((acc, f) => acc + f.rawSize, 0);
             sectorSizeLabel.innerText = `${formatSize(totalCatBytes)}`;
@@ -702,7 +776,6 @@
             const actualLimit = Math.min(catFiles.length, renderLimit);
             renderBatch(0, actualLimit);
 
-            // Infinite Scroll Sentinel
             if (catFiles.length > actualLimit) {
                 const sentinel = document.createElement('div');
                 sentinel.id = 'scroll-sentinel';
@@ -717,17 +790,29 @@
             }
         }
 
+        // Copy Path Helper
+        function copyStoragePath() {
+            const pathText = metaPathEl.innerText;
+            if (pathText) {
+                navigator.clipboard.writeText(pathText).then(() => {
+                    showToast("📋 Storage Path Copied to Clipboard!");
+                }).catch(() => {});
+            }
+        }
+        copyPathBtn.addEventListener('click', copyStoragePath);
+        metaPathEl.addEventListener('dblclick', copyStoragePath);
+
         function triggerMetadataOverlay(f) {
             if (!f) return;
             const metaName = document.getElementById('meta-name');
-            const metaPath = document.getElementById('meta-path');
             const metaSector = document.getElementById('meta-sector');
             const metaFormat = document.getElementById('meta-format');
             const metaSize = document.getElementById('meta-size');
             const metaDate = document.getElementById('meta-date');
 
             metaName.innerText = f.name;
-            metaPath.innerText = f.file.webkitRelativePath || f.name;
+            const relPath = f.file.webkitRelativePath || f.name;
+            metaPathEl.innerText = `[Host Volume] : \\${relPath.replace(/\//g, '\\')}`;
             metaSector.innerText = f.type;
             metaFormat.innerText = `.${f.ext}`;
             metaSize.innerText = `${f.rawSize.toLocaleString()} Bytes (${f.sizeStr})`;
@@ -737,7 +822,6 @@
             lbContent.classList.add('blurred');
         }
 
-        // Tap empty space around metadata card to dismiss
         metadataOverlay.addEventListener('click', (e) => {
             if (e.target === metadataOverlay) {
                 metadataOverlay.classList.add('hidden');
@@ -745,7 +829,7 @@
             }
         });
 
-        // Action Handler: Lightbox Modal & Transparent Overlay Controls
+        // Action Handler: Lightbox Modal & Transparent Controls
         async function handleFileAction(fileData) {
             currentActiveFile = fileData;
             currentActiveIndex = currentRenderedFiles.findIndex(f => f.id === fileData.id);
@@ -771,12 +855,34 @@
                 img.className = 'viewer-media-el';
                 img.alt = 'Preview';
                 
-                // Double tap zoom
-                let isZoomed = false;
-                img.addEventListener('dblclick', () => {
-                    isZoomed = !isZoomed;
-                    img.classList.toggle('zoomed', isZoomed);
+                // Double tap zoom + Pan dragging
+                let zoomScale = 1;
+                let panX = 0, panY = 0;
+                let isDragging = false, startX = 0, startY = 0;
+
+                const updateImgTransform = () => {
+                    img.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+                };
+
+                img.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    zoomScale = zoomScale === 1 ? 2.4 : 1;
+                    panX = 0; panY = 0;
+                    img.classList.toggle('zoomed', zoomScale > 1);
+                    updateImgTransform();
                 });
+
+                img.addEventListener('mousedown', (e) => {
+                    if (zoomScale > 1) {
+                        isDragging = true; startX = e.clientX - panX; startY = e.clientY - panY;
+                    }
+                });
+                window.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    panX = e.clientX - startX; panY = e.clientY - startY;
+                    updateImgTransform();
+                });
+                window.addEventListener('mouseup', () => { isDragging = false; });
 
                 lbContent.innerHTML = '';
                 lbContent.appendChild(img);
@@ -785,10 +891,9 @@
             else if (fileData.type === 'Videos' || fileData.type === 'Audio') {
                 const isAudio = fileData.type === 'Audio';
 
-                // Transparent overlay player controls, left volume readout, right time!
                 lbContent.innerHTML = `
-                    ${isAudio ? '<div class="audio-poster-container"><div class="audio-poster">🎵</div><div class="cinzel" style="color:var(--moth-gold);letter-spacing:0.18em;font-size:0.95rem;">AUDIO STREAM ACTIVE</div></div>' : `<video id="main-media" src="${url}" class="viewer-media-el" playsinline preload="auto"></video>`}
-                    ${isAudio ? `<audio id="main-media" src="${url}" playsinline preload="auto"></audio>` : ''}
+                    ${isAudio ? '<div class="audio-poster-container"><div class="audio-poster">🎵</div><div class="cinzel" style="color:var(--moth-gold);letter-spacing:0.18em;font-size:0.95rem;">AUDIO STREAM ACTIVE [LOOPING]</div></div>' : `<video id="main-media" src="${url}" class="viewer-media-el" playsinline preload="auto" loop></video>`}
+                    ${isAudio ? `<audio id="main-media" src="${url}" playsinline preload="auto" loop></audio>` : ''}
                     
                     <div class="custom-controls">
                         <div class="timeline-wrapper">
@@ -852,7 +957,6 @@
             volTimer = setTimeout(() => { volOsd.classList.remove('active'); }, 800);
         }
 
-        // Hardened Player Setup with Error Catch
         function setupCustomPlayer() {
             currentActiveMedia = document.getElementById('main-media');
             const playBtn = document.getElementById('cp-play');
@@ -913,7 +1017,6 @@
             });
         }
 
-        // Fullscreen Change Fade ESC Button
         function handleFullscreenChange() {
             if (document.fullscreenElement || document.webkitFullscreenElement) {
                 lbClose.classList.add('fade-away');
@@ -949,19 +1052,17 @@
             if (e.target === lightbox || e.target.classList.contains('lightbox-content')) closeLightbox();
         });
 
-        // Infinite Looping L/R Arrow File Switching
         function switchModalFile(direction) {
             if (currentRenderedFiles.length === 0) return;
             let nextIdx = currentActiveIndex + direction;
-            if (nextIdx < 0) nextIdx = currentRenderedFiles.length - 1; // Loop to base
-            if (nextIdx >= currentRenderedFiles.length) nextIdx = 0; // Loop to apex
+            if (nextIdx < 0) nextIdx = currentRenderedFiles.length - 1; 
+            if (nextIdx >= currentRenderedFiles.length) nextIdx = 0; 
             handleFileAction(currentRenderedFiles[nextIdx]);
         }
 
         navLeft.addEventListener('click', (e) => { e.stopPropagation(); switchModalFile(-1); });
         navRight.addEventListener('click', (e) => { e.stopPropagation(); switchModalFile(+1); });
 
-        // Hardened Global Shortcuts
         window.addEventListener('keydown', (e) => {
             if (e.ctrlKey && (e.key === 'k' || e.key === 'K')) {
                 e.preventDefault();
