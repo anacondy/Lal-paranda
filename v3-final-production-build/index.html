@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lal-paranda: The Vault | Ultimate File Explorer</title>
+    <title>Lal-paranda: The Vault | Masterpiece Edition</title>
     <link href="https://fonts.bunny.net/css?family=cinzel:400,700,900|lato:300,400,700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -145,7 +145,6 @@
         .grid-title { font-size: 1.5rem; color: var(--off-white); letter-spacing: 0.15em; text-transform: uppercase; margin: 0; }
         .sector-size-label { font-size: 0.85rem; color: var(--bright-red); font-weight: bold; letter-spacing: 0.08em; }
 
-        /* ALPHABET FAST JUMP BAR (Right Side along Scrollbar) */
         .alphabet-sidebar {
             position: fixed; right: 14px; top: 115px; bottom: 25px; width: 22px;
             display: flex; flex-direction: column; justify-content: space-between; align-items: center;
@@ -219,7 +218,7 @@
             background: rgba(3, 2, 3, 0.96); backdrop-filter: blur(20px); z-index: 9999;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
             opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
-            padding: 1rem;
+            padding: 1rem; outline: none;
         }
         #lightbox.active { opacity: 1; pointer-events: auto; }
         
@@ -230,13 +229,29 @@
         .lightbox-content { width: 100%; height: 100%; max-width: 1600px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; padding: 2.5rem 1rem; }
         .lightbox-content.blurred { filter: blur(16px); transition: filter 0.3s; }
         
+        /* GHOST DRAGGING SUPPRESSED, PANNING ENABLED */
         .viewer-media-el { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 6px; box-shadow: 0 15px 45px rgba(0,0,0,0.9); background: transparent; border: none; transition: transform 0.15s ease-out; }
         .viewer-media-el.zoomed { cursor: grab; }
         .viewer-media-el.zoomed:active { cursor: grabbing; }
         
-        .viewer-iframe { width: 85vw; height: 82vh; background: #fff; border: none; border-radius: 6px; box-shadow: 0 15px 45px rgba(0,0,0,0.9); }
-        .viewer-code { width: 85vw; height: 82vh; background: #0b080b; color: #f8f8f2; padding: 2.5rem; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; line-height: 1.5; overflow-y: auto; border: 1px solid rgba(255, 51, 75, 0.3); white-space: pre-wrap; word-break: break-word; outline: none; }
+        /* Integrated Smooth Document & Code Viewers */
+        .doc-scroll-wrapper { width: 88vw; height: 84vh; overflow-y: auto; background: #0c080c; border-radius: 8px; border: 1px solid rgba(255, 51, 75, 0.3); box-shadow: 0 15px 50px rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; padding: 2rem; outline: none; }
+        .viewer-pdf-embed { width: 100%; height: 1200px; border: none; background: #fff; border-radius: 4px; }
+        .viewer-code { width: 100%; font-family: 'Courier New', Courier, monospace; font-size: 0.98rem; line-height: 1.6; white-space: pre-wrap; word-break: break-word; color: #f8f8f2; outline: none; }
         
+        /* Enhanced Markdown Viewer Studio */
+        .markdown-preview-studio { width: 100%; max-width: 900px; background: #0f0b0f; color: #e8e8e8; padding: 3.5rem 4.5rem; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.7; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.08); }
+        .markdown-preview-studio h1, .markdown-preview-studio h2 { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.4rem; color: var(--bright-red); font-family: 'Cinzel', serif; }
+        .markdown-preview-studio pre { background: rgba(0,0,0,0.6); padding: 1.2rem; border-radius: 6px; border-left: 3px solid var(--moth-gold); overflow-x: auto; }
+        .markdown-preview-studio code { font-family: monospace; color: var(--moth-gold); }
+
+        /* HTML Live Split Studio */
+        .split-studio-container { width: 92vw; height: 84vh; display: flex; background: #080608; border-radius: 8px; border: 1px solid var(--deep-red); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.95); }
+        .split-code-area { width: 50%; height: 100%; background: #0f0c0f; color: #f8f8f2; font-family: monospace; font-size: 0.95rem; padding: 1.5rem; border: none; resize: none; outline: none; }
+        .split-resizer { width: 8px; background: rgba(255, 51, 75, 0.2); cursor: col-resize; transition: 0.2s; z-index: 10; }
+        .split-resizer:hover, .split-resizer.active { background: var(--bright-red); box-shadow: 0 0 15px var(--bright-red); }
+        .split-live-frame { flex: 1; height: 100%; background: #fff; border: none; }
+
         .lightbox-title { position: absolute; top: 1.5rem; left: 50%; transform: translateX(-50%); font-family: 'Cinzel', serif; letter-spacing: 0.12em; color: var(--bright-red); font-size: 1.25rem; font-weight: 900; text-align: center; max-width: 75%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 10001; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
 
         /* TRANSPARENT BORDERLESS OVERLAY PLAYER */
@@ -256,12 +271,10 @@
         input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
         
         .control-buttons { display: flex; align-items: center; justify-content: space-between; position: relative; width: 100%; font-family: 'Lato', sans-serif; font-weight: 700; font-size: 0.95rem; }
-        
         .cp-vol-readout { color: var(--bright-red); width: 120px; text-align: left; font-family: 'Cinzel', serif; letter-spacing: 0.08em; }
         .center-play-area { display: flex; align-items: center; justify-content: center; flex: 1; }
         .ctrl-btn { background: rgba(138,11,11,0.5); border: 1px solid var(--bright-red); color: var(--off-white); width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(4px); }
         .ctrl-btn:hover { background: var(--bright-red); color: var(--void-black); box-shadow: 0 0 20px var(--bright-red); transform: scale(1.1); }
-        
         #cp-time { color: var(--moth-gold); width: 120px; text-align: right; }
 
         .audio-poster-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 0; }
@@ -304,7 +317,6 @@
         .copy-btn { background: rgba(138, 11, 11, 0.4); border: 1px solid var(--bright-red); color: var(--bright-red); font-family: 'Cinzel', serif; font-size: 0.75rem; padding: 3px 10px; border-radius: 4px; cursor: pointer; margin-left: 12px; transition: all 0.2s; }
         .copy-btn:hover { background: var(--bright-red); color: var(--void-black); box-shadow: 0 0 12px var(--bright-red); }
 
-        /* Toast Notifications */
         .toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 20000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .gothic-toast { background: rgba(15, 10, 15, 0.95); border-left: 4px solid var(--moth-gold); border: 1px solid rgba(212,175,55,0.3); color: var(--off-white); padding: 1rem 1.6rem; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.9), 0 0 15px rgba(212,175,55,0.2); font-family: 'Lato', sans-serif; font-size: 0.95rem; font-weight: bold; pointer-events: auto; animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes toastSlideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -328,6 +340,7 @@
             .control-buttons { flex-direction: column; gap: 0.5rem; }
             .cp-vol-readout, #cp-time { width: 100%; text-align: center; }
             .meta-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .markdown-preview-studio { padding: 1.5rem; }
         }
     </style>
 </head>
@@ -395,12 +408,11 @@
             </div>
         </main>
 
-        <!-- Alphabet Quick Jump Bar (Right Side along Scrollbar) -->
         <div id="alphabet-sidebar" class="alphabet-sidebar hidden"></div>
     </div>
 
     <!-- Lightbox Modal -->
-    <div id="lightbox">
+    <div id="lightbox" tabindex="-1">
         <button class="lightbox-close" id="lb-close" title="Close (Esc)">✕ ESC</button>
         <div class="nav-hint left" id="nav-left" title="Looping Previous (Left Arrow)">〈</div>
         <div class="nav-hint right" id="nav-right" title="Looping Next (Right Arrow)">〉</div>
@@ -538,7 +550,6 @@
             }
         }
 
-        // Resizer Snap
         let isResizing = false;
         let isDragging = false;
         resizer.addEventListener('mousedown', () => { isResizing = true; isDragging = false; resizer.classList.add('active'); document.body.style.cursor = 'ew-resize'; });
@@ -653,6 +664,14 @@
                 }
 
                 card.addEventListener('click', () => handleFileAction(f));
+                
+                // Right Click Context Trigger for Card Metadata
+                card.addEventListener('contextmenu', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    currentActiveFile = f;
+                    triggerMetadataOverlay(f);
+                });
+
                 if ((f.type === 'Pictures' || f.type === 'Videos')) lazyObserver.observe(card);
                 fragment.appendChild(card);
             }
@@ -754,7 +773,6 @@
                 });
             }
 
-            // Toggle Alphabet Fast Jump Sidebar
             if (['name-asc', 'name-desc'].includes(sortVal) && !isGlobalSearch) {
                 alphabetSidebar.classList.remove('hidden');
             } else {
@@ -790,12 +808,11 @@
             }
         }
 
-        // Copy Path Helper
         function copyStoragePath() {
             const pathText = metaPathEl.innerText;
             if (pathText) {
                 navigator.clipboard.writeText(pathText).then(() => {
-                    showToast("📋 Storage Path Copied to Clipboard!");
+                    showToast("📋 Storage Path Copied to System Clipboard!");
                 }).catch(() => {});
             }
         }
@@ -829,6 +846,16 @@
             }
         });
 
+        // Syntax Highlighter for Code
+        function highlightSyntax(code) {
+            let safe = escapeHtml(code);
+            safe = safe.replace(/(\/\/[^\n]*|\#[^\n]*)/g, '<span style="color:#787578;">$1</span>');
+            safe = safe.replace(/(&quot;.*?&quot;|&#039;.*?&#039;|`.*?`)/g, '<span style="color:var(--moth-gold);">$1</span>');
+            safe = safe.replace(/\b(function|const|let|var|return|import|from|export|if|else|for|while|class|def|int|string|boolean|async|await|try|catch|true|false|null|undefined)\b/g, '<span style="color:var(--bright-red); font-weight:bold;">$1</span>');
+            safe = safe.replace(/\b(\d+)\b/g, '<span style="color:var(--highlight-purple);">$1</span>');
+            return safe;
+        }
+
         // Action Handler: Lightbox Modal & Transparent Controls
         async function handleFileAction(fileData) {
             currentActiveFile = fileData;
@@ -854,8 +881,8 @@
                 img.src = url;
                 img.className = 'viewer-media-el';
                 img.alt = 'Preview';
+                img.ondragstart = () => false; // Fix Ghost Dragging
                 
-                // Double tap zoom + Pan dragging
                 let zoomScale = 1;
                 let panX = 0, panY = 0;
                 let isDragging = false, startX = 0, startY = 0;
@@ -866,8 +893,15 @@
 
                 img.addEventListener('dblclick', (e) => {
                     e.stopPropagation();
-                    zoomScale = zoomScale === 1 ? 2.4 : 1;
-                    panX = 0; panY = 0;
+                    if (zoomScale === 1) {
+                        const rect = img.getBoundingClientRect();
+                        const ox = ((e.clientX - rect.left) / rect.width) * 100;
+                        const oy = ((e.clientY - rect.top) / rect.height) * 100;
+                        img.style.transformOrigin = `${ox}% ${oy}%`;
+                        zoomScale = 2.5;
+                    } else {
+                        zoomScale = 1; panX = 0; panY = 0;
+                    }
                     img.classList.toggle('zoomed', zoomScale > 1);
                     updateImgTransform();
                 });
@@ -913,16 +947,62 @@
             }
             else if (fileData.type === 'Documents' || fileData.type === 'Code') {
                 if (fileData.ext === 'PDF') {
-                    lbContent.innerHTML = `<iframe src="${url}" class="viewer-iframe" tabindex="0"></iframe>`;
-                } else if (['TXT', 'MD', 'JSON', 'CSV', 'JS', 'HTML', 'CSS', 'PY', 'RS', 'TS', 'JSX', 'TSX', 'CPP', 'C', 'JAVA', 'SH', 'PHP', 'XML', 'YAML', 'YML', 'TOML'].includes(fileData.ext)) {
+                    // Custom Integrated PDF Embed Wrapper (Smooth scrolling & matching aesthetics)
+                    lbContent.innerHTML = `<div id="doc-scroll-wrapper" class="doc-scroll-wrapper"><embed src="${url}#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf" class="viewer-pdf-embed"></div>`;
+                } else if (fileData.ext === 'MD') {
+                    // Enhanced Markdown Studio & Export to PDF
                     try {
                         const txt = await fileData.file.text();
-                        const pre = document.createElement('pre');
-                        pre.className = 'viewer-code';
-                        pre.tabIndex = 0;
-                        pre.textContent = txt;
+                        const studio = document.createElement('div');
+                        studio.className = 'doc-scroll-wrapper';
+                        studio.innerHTML = `<div class="markdown-preview-studio">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:1rem; margin-bottom:2rem;">
+                                <span class="cinzel" style="color:var(--moth-gold); letter-spacing:0.1em;">MARKDOWN STUDIO</span>
+                                <button onclick="window.print()" class="copy-btn" style="font-size:0.8rem; padding:4px 12px;">🖨️ EXPORT PDF (Ctrl+Shift+V)</button>
+                            </div>
+                            <pre style="background:transparent; border:none; padding:0;"><code>${highlightSyntax(txt)}</code></pre>
+                        </div>`;
                         lbContent.innerHTML = '';
-                        lbContent.appendChild(pre);
+                        lbContent.appendChild(studio);
+                    } catch (err) {}
+                } else if (fileData.ext === 'HTML') {
+                    // HTML Studio Studio with Split Runner
+                    try {
+                        const txt = await fileData.file.text();
+                        const studio = document.createElement('div');
+                        studio.className = 'split-studio-container';
+                        studio.innerHTML = `<textarea id="split-code-area" class="split-code-area" spellcheck="false">${txt}</textarea>
+                        <div id="split-resizer" class="split-resizer" title="Drag to adjust split"></div>
+                        <iframe id="split-live-frame" class="split-live-frame" sandbox="allow-scripts allow-modals"></iframe>`;
+                        
+                        lbContent.innerHTML = '';
+                        lbContent.appendChild(studio);
+                        
+                        const ta = document.getElementById('split-code-area');
+                        const ifr = document.getElementById('split-live-frame');
+                        const sRes = document.getElementById('split-resizer');
+                        
+                        const updateSplitLive = () => { ifr.srcdoc = ta.value; };
+                        ta.addEventListener('input', updateSplitLive);
+                        updateSplitLive();
+
+                        let sDrag = false;
+                        sRes.addEventListener('mousedown', () => { sDrag = true; sRes.classList.add('active'); });
+                        window.addEventListener('mousemove', (e) => {
+                            if (!sDrag) return;
+                            const pct = (e.clientX / window.innerWidth) * 100;
+                            if (pct > 15 && pct < 85) ta.style.width = `${pct}%`;
+                        });
+                        window.addEventListener('mouseup', () => { sDrag = false; sRes.classList.remove('active'); });
+                    } catch (err) {}
+                } else if (['TXT', 'JSON', 'CSV', 'JS', 'CSS', 'PY', 'RS', 'TS', 'JSX', 'TSX', 'CPP', 'C', 'JAVA', 'SH', 'PHP', 'XML', 'YAML', 'YML', 'TOML'].includes(fileData.ext)) {
+                    try {
+                        const txt = await fileData.file.text();
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'doc-scroll-wrapper';
+                        wrapper.innerHTML = `<pre class="viewer-code"><code>${highlightSyntax(txt)}</code></pre>`;
+                        lbContent.innerHTML = '';
+                        lbContent.appendChild(wrapper);
                     } catch (err) {
                         lbContent.innerHTML = '<div class="cinzel" style="color:var(--deep-red);">ERROR READING TEXT PAYLOAD</div>';
                     }
@@ -936,6 +1016,7 @@
                     `;
                 }
                 lightbox.classList.add('active');
+                lightbox.focus();
             } else {
                 lbContent.innerHTML = `
                     <div class="ufo-card">
@@ -945,6 +1026,7 @@
                     </div>
                 `;
                 lightbox.classList.add('active');
+                lightbox.focus();
             }
         }
 
@@ -1063,6 +1145,7 @@
         navLeft.addEventListener('click', (e) => { e.stopPropagation(); switchModalFile(-1); });
         navRight.addEventListener('click', (e) => { e.stopPropagation(); switchModalFile(+1); });
 
+        // Hardened Global Shortcuts
         window.addEventListener('keydown', (e) => {
             if (e.ctrlKey && (e.key === 'k' || e.key === 'K')) {
                 e.preventDefault();
@@ -1084,6 +1167,15 @@
             }
 
             if (lightbox.classList.contains('active')) {
+                // Export Markdown to PDF (Ctrl + Shift + V)
+                if (e.ctrlKey && e.shiftKey && (e.key === 'V' || e.key === 'v')) {
+                    if (currentActiveFile && currentActiveFile.ext === 'MD') {
+                        e.preventDefault();
+                        window.print();
+                        return;
+                    }
+                }
+
                 if (e.key === 'Escape') {
                     e.preventDefault();
                     if (!metadataOverlay.classList.contains('hidden')) {
@@ -1129,14 +1221,14 @@
                         showVolumeOSD(currentActiveMedia.muted ? 0 : currentActiveMedia.volume);
                     }
                 } else if (currentActiveFile && ['Documents', 'Code'].includes(currentActiveFile.type)) {
-                    const docEl = lbContent.querySelector('.viewer-code') || lbContent.querySelector('.viewer-iframe');
+                    const docEl = lbContent.querySelector('.doc-scroll-wrapper') || lbContent.querySelector('.viewer-iframe');
                     if (docEl) {
                         if (e.key === 'ArrowDown') { e.preventDefault(); docEl.scrollBy(0, 80); }
                         if (e.key === 'ArrowUp') { e.preventDefault(); docEl.scrollBy(0, -80); }
                     }
                 }
             } else {
-                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'TEXTAREA') {
                     if (e.key === 'PageDown') {
                         e.preventDefault(); mainContent.scrollBy(0, window.innerHeight * 0.85);
                     } else if (e.key === 'PageUp') {
